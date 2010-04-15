@@ -1,0 +1,45 @@
+#!/usr/bin/env ruby
+# See LICENSE
+
+require 'rubygems';
+require 'open3';
+require 'json';
+
+
+# Generates the list of process that are running
+def processIds(appId)
+  Open3.popen3("novacom -- run file://usr/bin/luna-send -i -n 1 luna://com.palm.applicationManager/running {}") do |stdin, stdout, stderr|
+    response = stderr.readline.gsub!(/\*\* Message: serviceResponse Handling: 2, /, "");
+    jsonObj = JSON.parse(response);
+
+    ret = [];
+    jsonObj["running"].each do |value|
+      if value["id"] == appId
+        ret.push value["processid"];
+      end
+    end
+    return ret;
+  end
+end
+
+def loadAppInfo()
+  app_info = {}
+  File.open("appinfo.json", "r") do |f|
+    return JSON.load(f)
+  end
+end
+
+appInfo = loadAppInfo;
+runningList = processIds appInfo["id"];
+
+print "Running Processes for ", appInfo["id"], "\n"
+runningList.each_index do |index|
+  value = runningList[index];
+  print "  [", index+1, "] ", value, "\n";
+end
+
+ARGV.each do |value|
+  value = Integer(value)-1;
+  print "Inspecting process ", runningList[value], "\n";
+  system("novacom -- run file://usr/bin/luna-send luna://com.palm.applicationManager/inspect '{\"processId\":\"" + runningList[value] + "\"}'");
+end
