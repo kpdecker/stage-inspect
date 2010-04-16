@@ -61,19 +61,36 @@ def list(appId)
 end
 
 options = { :appId => loadAppInfo["id"]  }
-OptionParser.new do |opts|
-  opts.banner = "Usage: stage-inspect [options]"
+begin
+  OptionParser.new do |opts|
+    opts.on("-iMANDATORY", "--appId=MANDATORY", "Application ID") do |v|
+      options[:appId] = v
+    end
+    opts.on("-a", "--all", "All applications") do |v|
+      options[:appId] = nil
+    end
+    opts.on("-l", "--list", "List running processes") do
+      options[:list] = true
+    end
+    opts.on("-h", "--help", "List running processes") do
+      raise
+    end
+  end.parse!
+rescue
+  puts(<<-eos
+Usage: inspect-tool [--appId appId | -i appId | --all] [--list] [stageIndex | stageId]
+    stageIndex: Index of stage to inspect. This index is relative to the list output by --list
+    stageId: Id of stage to inspect i.e. 1007
+    --list: Lists the currently running processes. This option is implied if neither stageIndex
+            nor stageId are specified.
 
-  opts.on("-iMANDATORY", "--appId=MANDATORY", "Application ID") do |v|
-    options[:appId] = v
-  end
-  opts.on("-a", "--all", "All applications") do |v|
-    options[:appId] = nil
-  end
-  opts.on("-l", "--list", "List running processes") do
-    options[:list] = true
-  end
-end.parse!
+    -i appId: Application ID to display associated processes
+    --appId appId: Application ID to display associated processes
+    --all : Display all running processes
+eos
+)
+  exit
+end
 
 $runningList = processIds options[:appId];
 
