@@ -2,9 +2,9 @@
 # See LICENSE
 
 require 'rubygems';
+require 'optparse';
 require 'open3';
 require 'json';
-
 
 # Generates the list of process that are running
 def processIds(appId)
@@ -20,8 +20,8 @@ def processIds(appId)
 
     ret = [];
     jsonObj["running"].each do |value|
-      if value["id"] == appId
-        ret.push value["processid"];
+      if appId == nil or value["id"] == appId
+        ret.push value;
       end
     end
     return ret;
@@ -37,17 +37,50 @@ def loadAppInfo()
   return {}
 end
 
-appInfo = loadAppInfo;
-runningList = processIds appInfo["id"];
+def list(appId)
+  runningList = processIds appId;
 
-print "Running Processes for ", appInfo["id"], "\n"
-runningList.each_index do |index|
-  value = runningList[index];
-  print "  [", index+1, "] ", value, "\n";
+  if appId
+    print "Running Processes for ", appId, "\n"
+  else
+    print "Running Processes\n"
+  end
+
+  runningList.each_index do |index|
+    value = runningList[index];
+    if appId
+      print "  [", index+1, "] ", value["processid"], "\n";
+    else
+      print "  [", index+1, "] ", value["id"], " => ", value["processid"], "\n";
+    end
+  end
 end
 
-ARGV.each do |value|
-  value = Integer(value)-1;
-  print "Inspecting process ", runningList[value], "\n";
-  system("novacom -- run file://usr/bin/luna-send luna://com.palm.applicationManager/inspect '{\"processId\":\"" + runningList[value] + "\"}'");
+options = { :appId => loadAppInfo["id"]  }
+OptionParser.new do |opts|
+  opts.banner = "Usage: stage-inspect [options]"
+
+  opts.on("-iMANDATORY", "--appId=MANDATORY", "Application ID") do |v|
+    options[:appId] = v
+  end
+  opts.on("-a", "--all", "All applications") do |v|
+    options[:appId] = nil
+  end
+  opts.on("-l", "--list", "List running processes") do
+    options[:list] = true
+    list options[:appId]
+  end
+end.parse!
+
+if ARGV.length === 0
+  list options[:appId]
+else
+  runningList = processIds options[:appId];
+  ARGV.each do |value|
+    value = Integer(value);
+    value = runningList[value-1]["processid"] if value <= runningList.length
+
+    print "Inspecting process ", value, "\n";
+    system("novacom -- run file://usr/bin/luna-send luna://com.palm.applicationManager/inspect '{\"processId\":\"" + value.to_s + "\"}'");
+  end
 end
