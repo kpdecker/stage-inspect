@@ -44,16 +44,14 @@ def loadAppInfo()
 end
 
 def list(appId)
-  runningList = processIds appId;
-
   if appId
     print "Running Processes for ", appId, "\n"
   else
     print "Running Processes\n"
   end
 
-  runningList.each_index do |index|
-    value = runningList[index];
+  $runningList.each_index do |index|
+    value = $runningList[index];
     if appId
       print "  [", index+1, "] ", value["processid"], "\n";
     else
@@ -74,19 +72,19 @@ OptionParser.new do |opts|
   end
   opts.on("-l", "--list", "List running processes") do
     options[:list] = true
-    list options[:appId]
   end
 end.parse!
 
-if ARGV.length === 0
-  list options[:appId]
-else
-  runningList = processIds options[:appId];
-  ARGV.each do |value|
-    value = Integer(value);
-    value = runningList[value-1]["processid"] if value <= runningList.length
+$runningList = processIds options[:appId];
 
-    print "Inspecting process ", value, "\n";
-    system("novacom -- run file://usr/bin/luna-send luna://com.palm.applicationManager/inspect '{\"processId\":\"" + value.to_s + "\"}'");
-  end
+if options[:list] or ARGV.length === 0
+  list options[:appId]
+end
+
+ARGV.each do |value|
+  value = Integer(value);
+  value = SrunningList[value-1]["processid"] if value <= SrunningList.length
+
+  print "Inspecting process ", value, "\n";
+  system("novacom -- run file://usr/bin/luna-send luna://com.palm.applicationManager/inspect '{\"processId\":\"" + value.to_s + "\"}'");
 end
