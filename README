@@ -1,22 +1,25 @@
-stage-inspect : Multi-stage webOS application inspector selector
+stage-inspect : Multi-stage webOS inspector selector
+
+This tool selects the inspect target stage on the emulator. This tool should be run before
+launching the Palm Inspector application.
 
 Usage:
-inspect-tool inspect [-A appId] stage
-Initializes the inspector for the given stage.
-  
- * -A appId: Application ID. This may be omitted if the current directory has
-             appinfo.json with the relevant ID.
- * stage: May be the process ID to inspect or relative index within the application's stage list
+inspect-tool [--appId appId | -a appId | --all] [--list] [--list | stageIndex | stageId]
+ * stageIndex: Index of stage to inspect. This index is relative to the list output by --list
+ * stageId: Id of stage to inspect i.e. 1007
+ * --list: Lists the currently running processes. This option is implied if neither stageIndex
+    nor stageId are specified.
 
-inspect-tool list [-A appId | --all]
-Lists the currently running processes.
-
- * -A appId: Application ID to display associated processes
+ * -i appId: Application ID to display associated processes
+ * --appId appId: Application ID to display associated processes
  * --all : Display all running processes
 
-If neither --all or -A options are explicitly specified, the script will display
-running processes for the application defined in ./appinfo.json.
+If none of --all --appId, or -A options are explicitly specified, the all operations
+will used the application id defined in ./appinfo.json.
 
 Dependencies:
  * Palm SDK
  * JSON gem
+
+Warning:
+The palm-launch inspect option should not be used in conjunction with this tool.
