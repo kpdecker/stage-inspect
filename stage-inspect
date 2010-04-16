@@ -9,7 +9,13 @@ require 'json';
 # Generates the list of process that are running
 def processIds(appId)
   Open3.popen3("novacom -- run file://usr/bin/luna-send -i -n 1 luna://com.palm.applicationManager/running {}") do |stdin, stdout, stderr|
-    response = stderr.readline.gsub!(/\*\* Message: serviceResponse Handling: 2, /, "");
+    responseLine = stderr.readline
+    response = responseLine.gsub!(/\*\* Message: serviceResponse Handling: 2, /, "");
+    if !response
+      puts responseLine
+      exit
+    end
+
     jsonObj = JSON.parse(response);
 
     ret = [];
@@ -23,10 +29,12 @@ def processIds(appId)
 end
 
 def loadAppInfo()
-  app_info = {}
-  File.open("appinfo.json", "r") do |f|
-    return JSON.load(f)
+  if File::exists?("appinfo.json")
+    File.open("appinfo.json", "r") do |f|
+      return JSON.load(f);
+    end
   end
+  return {}
 end
 
 appInfo = loadAppInfo;
