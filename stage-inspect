@@ -24,6 +24,12 @@ def processIds(appId)
         ret.push value;
       end
     end
+
+    ret.sort! do |a, b|
+      idcmp = a["id"] <=> b["id"]
+      idcmp == 0 ? a["processid"] <=> b["processid"] : idcmp
+    end
+
     return ret;
   end
 end
