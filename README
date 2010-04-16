@@ -3,8 +3,7 @@ stage-inspect : Multi-stage webOS inspector selector
 This tool selects the inspect target stage on the emulator. This tool should be run before
 launching the Palm Inspector application.
 
-Usage:
-inspect-tool [--appId appId | -a appId | --all] [--list] [--list | stageIndex | stageId]
+Usage: inspect-tool [--appId appId | -i appId | --all] [--list] [stageIndex | stageId]
  * stageIndex: Index of stage to inspect. This index is relative to the list output by --list
  * stageId: Id of stage to inspect i.e. 1007
  * --list: Lists the currently running processes. This option is implied if neither stageIndex
