@@ -100,7 +100,7 @@ end
 
 ARGV.each do |value|
   value = Integer(value);
-  value = SrunningList[value-1]["processid"] if value <= SrunningList.length
+  value = $runningList[value-1]["processid"] if value <= $runningList.length
 
   print "Inspecting process ", value, "\n";
   system("novacom -- run file://usr/bin/luna-send luna://com.palm.applicationManager/inspect '{\"processId\":\"" + value.to_s + "\"}'");
